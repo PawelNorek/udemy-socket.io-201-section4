@@ -1,6 +1,7 @@
 import express from 'express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
+import namespaces from './data/namespaces.mjs'
 
 const app = express()
 const httpServer = createServer(app)
@@ -15,11 +16,11 @@ const __dirname = path.dirname(__filename)
 app.use(express.static(__dirname + '/public'))
 
 io.on('connection', socket => {
-	console.log(socket.id, 'connected')
-	socket.on('newMessageToSever', dataFromClient => {
-		console.log('Data:', dataFromClient)
-		io.emit('newMessageToClients', { text: dataFromClient.text })
+	socket.emit('welcome', 'Welcome to the server.')
+	socket.on('clientConnect', data => {
+		console.log(socket.id, 'has connected')
 	})
+	socket.emit('nsList', namespaces)
 })
 
 httpServer.listen(3001)
