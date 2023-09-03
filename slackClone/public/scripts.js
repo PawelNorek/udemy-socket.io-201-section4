@@ -1,5 +1,8 @@
-const userName = prompt('What is your user name')
-const password = prompt('What is your user password')
+// const userName = prompt('What is your user name')
+// const password = prompt('What is your user password')
+
+const userName = 'Fornol'
+const password = 'x'
 
 const socket = io('http://192.168.1.191:3001')
 
