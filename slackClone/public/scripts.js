@@ -17,6 +17,7 @@ socket.on('nsList', nsData => {
 	nameSpacesDiv.innerHTML = ''
 	nsData.forEach(ns => {
 		nameSpacesDiv.innerHTML += `<div class="namespace" ns='${ns.endpoint}'><img src='${ns.image}'></div>`
+		io(`http://192.168.1.191:3001${ns.endpoint}`)
 	})
 
 	Array.from(document.getElementsByClassName('namespace')).forEach(element => {
