@@ -4,20 +4,53 @@
 const userName = 'Fornol'
 const password = 'x'
 
-const socket = io('http://192.168.1.191:3001')
-
-const nameSpaceSockets = []
-const listeners = {
-	nsChange: [],
+const clientOptions = {
+	query: {},
+	auth: {
+		userName,
+		password,
+	},
 }
 
+const socket = io('http://192.168.1.191:3001', clientOptions)
+
+const nameSpaceSockets = []
+
+const listeners = {
+	nsChange: [],
+	messageToRoom: [],
+}
+
+let selectedNsId = 0
+document.querySelector('#message-form').addEventListener('submit', e => {
+	e.preventDefault()
+	const newMessage = document.querySelector('#user-message').value
+	console.log(newMessage, selectedNsId)
+	nameSpaceSockets[selectedNsId].emit('newMessageToRoom', {
+		newMessage,
+		date: Date.now(),
+		avatar: 'https://via.placeholder.com/30',
+		userName,
+		selectedNsId,
+	})
+	document.querySelector('#user-message').value = ''
+})
+
 const addListeners = nsId => {
-	if (listeners.nsChange[nsId]) {
+	console.log('add listeners function')
+	if (!listeners.nsChange[nsId]) {
 		nameSpaceSockets[nsId].on('nsChange', data => {
 			console.log('Namespace changed')
 			console.log(data)
 		})
 		listeners.nsChange[nsId] = true
+	}
+	if (!listeners.messageToRoom[nsId]) {
+		nameSpaceSockets[nsId].on('messageToRoom', messageObj => {
+			console.log(messageObj)
+			document.querySelector('#messages').innerHTML += buildMessageHtml(messageObj)
+		})
+		listeners.messageToRoom[nsId] = true
 	}
 }
 
@@ -36,8 +69,8 @@ socket.on('nsList', nsData => {
 		if (!nameSpaceSockets[ns.id]) {
 			nameSpaceSockets[ns.id] = io(`http://192.168.1.191:3001${ns.endpoint}`)
 		}
-
-		addListeners[ns.id]
+		console.log('add listeners')
+		addListeners(ns.id)
 	})
 
 	Array.from(document.getElementsByClassName('namespace')).forEach(element => {
@@ -50,4 +83,6 @@ socket.on('nsList', nsData => {
 		lastNs ? document.querySelector('[ns="' + lastNs + '"]') : document.getElementsByClassName('namespace')[0],
 		nsData
 	)
+
+	console.log('listeners: ', listeners)
 })
